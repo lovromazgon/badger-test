@@ -36,6 +36,7 @@ func TestBadgerTransactions(t *testing.T) {
 			val1 := []byte("foo")
 			val2 := []byte("bar")
 
+			// both transaction start at the same time
 			txn1 := db.NewTransaction(true)
 			txn2 := db.NewTransaction(true)
 			defer txn1.Discard()
@@ -43,12 +44,15 @@ func TestBadgerTransactions(t *testing.T) {
 
 			var wg sync.WaitGroup
 			wg.Add(2)
+			// we try to set the same key and commit the transaction in two
+			// separate go routines, two separate transactions
 			go setAndCommit(&wg, txn1, key, val1)
 			go setAndCommit(&wg, txn2, key, val2)
 			wg.Wait()
 
-			// I would expect one of the transactions to fail but actually both succeed
-			// and the result is non-deterministic.
+			// if we made it this far the test didn't fail yet - why? shouldn't
+			// one of the transactions fail?!
+			// let's check the value that's in the DB
 			var got []byte
 			err = db.View(func(txn *badger.Txn) error {
 				item, err := txn.Get(key)
@@ -65,6 +69,8 @@ func TestBadgerTransactions(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			// most of the time the value will match val1, but in some runs it
+			// does not, result is non-deterministic
 			if string(got) != string(val1) {
 				t.Fatal("got did not match val1")
 			}
