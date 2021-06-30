@@ -24,6 +24,25 @@ func TestBadgerTransactions(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+
+		// to be completely sure the value is set try to get it now
+		item, err := txn.Get(key)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got []byte
+		err = item.Value(func(val []byte) error {
+			got = val
+			return nil
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if string(got) != string(val) {
+			t.Fatalf("expected %s, got %s", val, got)
+		}
+
 		err = txn.Commit()
 		if err != nil {
 			t.Fatal(err)
