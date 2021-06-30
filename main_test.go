@@ -30,6 +30,7 @@ func TestBadgerTransactions(t *testing.T) {
 		}
 	}
 
+	// run test 100 times to get some failures and prove non-deterministic behavior
 	for i := 0; i < 100; i++ {
 		t.Run("run", func(t *testing.T) {
 			key := []byte(uuid.NewString())
