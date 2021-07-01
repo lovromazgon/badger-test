@@ -5,11 +5,11 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/dgraph-io/badger/v2"
+	"github.com/dgraph-io/badger/v3"
 	"github.com/google/uuid"
 )
 
-func TestBadgerTransactions(t *testing.T) {
+func TestBadgerSet(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "badger.db")
 	opt := badger.DefaultOptions(path)
 
@@ -18,31 +18,29 @@ func TestBadgerTransactions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	setAndCommit := func(wg *sync.WaitGroup, txn *badger.Txn, key, val []byte) {
+	setAndCommit := func(t *testing.T, wg *sync.WaitGroup, txn *badger.Txn, key, val []byte) {
 		defer wg.Done()
-		err := txn.Set(key, val)
+
+		// NOTE: uncomment next lines to get consistent failures
+		// when a key is read in a transaction badger will make sure it was not
+		// modified in the meantime when committing
+
+		// // first read the value saved for this key, it should fail, there is no value
+		// item, err := txn.Get(key)
+		// if err == nil {
+		// 	// there is something set under this key?! read it
+		// 	var got []byte
+		// 	err = item.Value(func(val []byte) error {
+		// 		got = val
+		// 		return nil
+		// 	})
+		// 	t.Fatalf("expected no key at this point, got %s", got)
+		// }
+
+		err = txn.Set(key, val)
 		if err != nil {
 			t.Fatal(err)
 		}
-
-		// to be completely sure the value is set try to get it now
-		item, err := txn.Get(key)
-		if err != nil {
-			t.Fatal(err)
-		}
-		var got []byte
-		err = item.Value(func(val []byte) error {
-			got = val
-			return nil
-		})
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if string(got) != string(val) {
-			t.Fatalf("expected %s, got %s", val, got)
-		}
-
 		err = txn.Commit()
 		if err != nil {
 			t.Fatal(err)
@@ -66,8 +64,8 @@ func TestBadgerTransactions(t *testing.T) {
 			wg.Add(2)
 			// we try to set the same key and commit the transaction in two
 			// separate go routines, two separate transactions
-			go setAndCommit(&wg, txn1, key, val1)
-			go setAndCommit(&wg, txn2, key, val2)
+			go setAndCommit(t, &wg, txn1, key, val1)
+			go setAndCommit(t, &wg, txn2, key, val2)
 			wg.Wait()
 
 			// if we made it this far the test didn't fail yet - why? shouldn't
