@@ -7,7 +7,7 @@ import (
 	"github.com/dgraph-io/badger/v3"
 )
 
-// TestBadgerIteratorTransaction creates a transaction and writes 2 values in
+// TestBadgerIteratorTransactionV3 creates a transaction and writes 2 values in
 // that transaction. Before committing it, it tries to read a value and succeeds
 // but iterating through the values does not work. After committing the
 // transaction the test creates a new transaction and tries iterating through

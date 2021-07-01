@@ -7,11 +7,11 @@ import (
 	"github.com/dgraph-io/badger/v2"
 )
 
-// TestBadgerIteratorTransaction creates a transaction and writes 2 values in
-// that transaction. Before committing it, it tries to read a value and succeeds
-// but iterating through the values does not work. After committing the
+// TestBadgerIteratorTransactionV2 creates a transaction and writes 2 values in
+// that transaction. Before committing it, it tries to read a value and
+// succeeds, iterating through values also works. After committing the
 // transaction the test creates a new transaction and tries iterating through
-// values, it works then.
+// values again, that works as well.
 func TestBadgerIteratorTransactionV2(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "badger.db")
 	opt := badger.DefaultOptions(path)
@@ -69,7 +69,7 @@ func TestBadgerIteratorTransactionV2(t *testing.T) {
 	}
 	it.Close()
 
-	// now the iterator finds 2 keys
+	// iterator still finds 2 keys
 	if len(results) != 2 {
 		t.Fatalf("expected 2 keys, got %d", len(results))
 	}
