@@ -50,7 +50,7 @@ func TestBadgerIteratorTransactionV2(t *testing.T) {
 
 	// NOTE: iterator finds 2 keys, badger v2 works as expected
 	if len(results) != 2 {
-		t.Fatalf("expected 2 keys, got %d", len(results))
+		t.Errorf("expected 2 keys, got %d", len(results))
 	}
 
 	// iterate again after committing the transaction

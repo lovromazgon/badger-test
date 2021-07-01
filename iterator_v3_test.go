@@ -51,8 +51,8 @@ func TestBadgerIteratorTransactionV3(t *testing.T) {
 	// --------------------------------------
 	// BUG: iterator actually finds 0 results
 	// --------------------------------------
-	if len(results) != 0 { // expectation should say len(results) != 2
-		t.Fatalf("expected 0 keys, got %d", len(results))
+	if len(results) != 2 {
+		t.Errorf("expected 2 keys, got %d", len(results))
 	}
 
 	// iterate again after committing the transaction
